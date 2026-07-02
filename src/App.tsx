@@ -144,6 +144,7 @@ export default function App() {
   const [isPressing, setIsPressing] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [showHowTo, setShowHowTo] = useState<boolean>(false);
+  const [controlMode, setControlMode] = useState<'HOLD' | 'TAP'>('HOLD');
 
   const startTimeRef = useRef<number>(0);
   const isPressingRef = useRef<boolean>(false);
@@ -169,6 +170,11 @@ export default function App() {
         setIsMuted(true);
         synthRef.current.muted = true;
       }
+
+      const storedControlMode = localStorage.getItem('chrono_control_mode');
+      if (storedControlMode === 'HOLD' || storedControlMode === 'TAP') {
+        setControlMode(storedControlMode as 'HOLD' | 'TAP');
+      }
     } catch (e) {
       console.error('Failed to load local storage stats', e);
     }
@@ -183,6 +189,12 @@ export default function App() {
     setIsMuted(newState);
     synthRef.current.muted = newState;
     localStorage.setItem('chrono_muted', newState ? 'true' : 'false');
+  };
+
+  const handleControlModeChange = (mode: 'HOLD' | 'TAP') => {
+    if (gameState !== 'IDLE') return;
+    setControlMode(mode);
+    localStorage.setItem('chrono_control_mode', mode);
   };
 
   // Safe timer boundary to prevent excessive holding
@@ -284,6 +296,17 @@ export default function App() {
     setGameState('RESULT');
   };
 
+  const handleTap = (e: React.MouseEvent | React.TouchEvent) => {
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    if (gameState === 'IDLE') {
+      startCounting(e);
+    } else if (gameState === 'COUNTING') {
+      stopCounting(e);
+    }
+  };
+
   const handleNextRound = () => {
     setTargetTime(generateTargetTime());
     setGameState('IDLE');
@@ -375,6 +398,42 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* Play Mode Selector */}
+        {gameState !== 'COUNTING' && (
+          <div className="flex justify-center my-1.5 sm:my-2">
+            <div className="inline-flex p-0.5 bg-zinc-950/80 border border-zinc-900 rounded-lg">
+              <button
+                id="mode-hold"
+                onClick={() => handleControlModeChange('HOLD')}
+                disabled={gameState !== 'IDLE'}
+                className={`px-3.5 py-1 text-[10px] font-mono font-black tracking-wider rounded-md transition-all ${
+                  gameState !== 'IDLE' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                } ${
+                  controlMode === 'HOLD'
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800/60 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                HOLD MODE
+              </button>
+              <button
+                id="mode-tap"
+                onClick={() => handleControlModeChange('TAP')}
+                disabled={gameState !== 'IDLE'}
+                className={`px-3.5 py-1 text-[10px] font-mono font-black tracking-wider rounded-md transition-all ${
+                  gameState !== 'IDLE' ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'
+                } ${
+                  controlMode === 'TAP'
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800/60 shadow-[0_0_10px_rgba(16,185,129,0.1)]'
+                    : 'text-zinc-500 hover:text-zinc-300'
+                }`}
+              >
+                TAP MODE
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Main Display Stage */}
         <main id="game-stage" className="flex-grow flex flex-col justify-center items-center py-1 sm:py-2 relative min-h-0">
@@ -521,15 +580,35 @@ export default function App() {
             
             <motion.button
               id="trigger-button"
-              onMouseDown={startCounting}
-              onMouseUp={() => stopCounting()}
+              onMouseDown={(e) => {
+                if (controlMode === 'HOLD') {
+                  startCounting(e);
+                } else {
+                  handleTap(e);
+                }
+              }}
+              onMouseUp={(e) => {
+                if (controlMode === 'HOLD') {
+                  stopCounting(e);
+                }
+              }}
               onMouseLeave={() => {
-                if (gameState === 'COUNTING') {
+                if (controlMode === 'HOLD' && gameState === 'COUNTING') {
                   stopCounting();
                 }
               }}
-              onTouchStart={startCounting}
-              onTouchEnd={() => stopCounting()}
+              onTouchStart={(e) => {
+                if (controlMode === 'HOLD') {
+                  startCounting(e);
+                } else {
+                  handleTap(e);
+                }
+              }}
+              onTouchEnd={(e) => {
+                if (controlMode === 'HOLD') {
+                  stopCounting(e);
+                }
+              }}
               className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center border-4 outline-none relative select-none touch-none cursor-pointer transition-all ${
                 gameState === 'IDLE' 
                   ? 'bg-zinc-900 border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900/90 shadow-[0_0_20px_rgba(16,185,129,0.05)] text-zinc-300' 
@@ -542,14 +621,22 @@ export default function App() {
             >
               {gameState === 'IDLE' && (
                 <div className="flex flex-col items-center pointer-events-none">
-                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-zinc-400">HOLD</span>
-                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-zinc-600 mt-0.5">TRIGGER</span>
+                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-zinc-400">
+                    {controlMode === 'HOLD' ? 'HOLD' : 'TAP'}
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-zinc-600 mt-0.5">
+                    {controlMode === 'HOLD' ? 'TRIGGER' : 'START'}
+                  </span>
                 </div>
               )}
               {gameState === 'COUNTING' && (
                 <div className="flex flex-col items-center pointer-events-none">
-                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-white">RELEASE</span>
-                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-red-200 mt-0.5">AT TARGET</span>
+                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-white animate-pulse">
+                    {controlMode === 'HOLD' ? 'RELEASE' : 'TAP'}
+                  </span>
+                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-red-200 mt-0.5 animate-pulse">
+                    {controlMode === 'HOLD' ? 'AT TARGET' : 'TO STOP'}
+                  </span>
                 </div>
               )}
               {gameState === 'RESULT' && (
