@@ -12,7 +12,6 @@ import {
   Sparkles, 
   Volume2, 
   VolumeX, 
-  Share2, 
   Zap, 
   HelpCircle, 
   ArrowRight,
@@ -145,7 +144,6 @@ export default function App() {
   const [isPressing, setIsPressing] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const [showHowTo, setShowHowTo] = useState<boolean>(false);
-  const [shareCopied, setShareCopied] = useState<boolean>(false);
 
   const startTimeRef = useRef<number>(0);
   const isPressingRef = useRef<boolean>(false);
@@ -305,29 +303,7 @@ export default function App() {
     }
   };
 
-  const sharePerformance = () => {
-    if (gameState !== 'RESULT') return;
-    const delta = elapsedTime - targetTime;
-    const tier = getAccuracyTier(delta);
-    const text = `CHRONO_SENSE 🧭\nTarget: ${targetTime.toFixed(2)}s\nActual: ${elapsedTime.toFixed(3)}s\nDelta: ${formatDelta(delta)}\nRank: ${tier.label}\nStreak: ${streak} 🔥\nCan you beat your internal clock?`;
-    
-    try {
-      if (navigator.share) {
-        navigator.share({
-          title: 'CHRONO_SENSE Timing Challenge',
-          text: text,
-        });
-      } else {
-        navigator.clipboard.writeText(text);
-        setShareCopied(true);
-        setTimeout(() => setShareCopied(false), 2000);
-      }
-    } catch (e) {
-      navigator.clipboard.writeText(text);
-      setShareCopied(true);
-      setTimeout(() => setShareCopied(false), 2000);
-    }
-  };
+
 
   // Compute accuracy tier variables for RESULT phase
   const currentDelta = elapsedTime - targetTime;
@@ -339,10 +315,10 @@ export default function App() {
       {/* Background ambient lighting */}
       <div className="absolute top-[-10%] left-[-10%] w-[120%] h-[50%] bg-[radial-gradient(circle_at_center,rgba(39,39,42,0.15),transparent_60%)] pointer-events-none" />
       
-      <div className="w-full max-w-md mx-auto flex flex-col h-full px-5 py-6 justify-between relative z-10">
+      <div className="w-full max-w-md mx-auto flex flex-col h-full px-5 pt-3 pb-4 sm:pt-6 sm:pb-6 justify-between relative z-10">
         
         {/* Header Block */}
-        <header id="header-container" className="flex items-center justify-between w-full border-b border-zinc-900 pb-4">
+        <header id="header-container" className="flex items-center justify-between w-full border-b border-zinc-900 pb-2.5 sm:pb-4">
           <div className="flex flex-col">
             <h1 id="logo-brand" className="text-lg font-display tracking-widest font-extrabold text-white flex items-center gap-1.5">
               CHRONO<span className="text-zinc-500 font-medium">_</span>SENSE
@@ -372,28 +348,28 @@ export default function App() {
         </header>
 
         {/* Stats Strip */}
-        <section id="stats-dashboard" className="grid grid-cols-3 gap-2.5 my-3">
-          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2.5 flex flex-col items-center justify-center transition-all">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Best Streak</span>
+        <section id="stats-dashboard" className="grid grid-cols-3 gap-2 my-1.5 sm:my-3">
+          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2 sm:p-2.5 flex flex-col items-center justify-center transition-all">
+            <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Best Streak</span>
             <div className="flex items-center gap-1">
-              <Trophy className="h-3.5 w-3.5 text-amber-500" />
-              <span className="text-sm font-mono font-bold text-white">{highScore}</span>
+              <Trophy className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-amber-500" />
+              <span className="text-xs sm:text-sm font-mono font-bold text-white">{highScore}</span>
             </div>
           </div>
 
-          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2.5 flex flex-col items-center justify-center transition-all">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Current Streak</span>
+          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2 sm:p-2.5 flex flex-col items-center justify-center transition-all">
+            <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Current Streak</span>
             <div className="flex items-center gap-1">
-              <Flame className={`h-3.5 w-3.5 ${streak > 0 ? 'text-orange-500 animate-bounce' : 'text-zinc-600'}`} />
-              <span className={`text-sm font-mono font-bold ${streak > 0 ? 'text-orange-400' : 'text-zinc-400'}`}>{streak}</span>
+              <Flame className={`h-3 sm:h-3.5 w-3 sm:w-3.5 ${streak > 0 ? 'text-orange-500 animate-bounce' : 'text-zinc-600'}`} />
+              <span className={`text-xs sm:text-sm font-mono font-bold ${streak > 0 ? 'text-orange-400' : 'text-zinc-400'}`}>{streak}</span>
             </div>
           </div>
 
-          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2.5 flex flex-col items-center justify-center transition-all">
-            <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Best Delta</span>
+          <div className="bg-zinc-900/45 border border-zinc-800/60 rounded-xl p-2 sm:p-2.5 flex flex-col items-center justify-center transition-all">
+            <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-0.5">Best Delta</span>
             <div className="flex items-center gap-1">
-              <Clock className="h-3.5 w-3.5 text-teal-400" />
-              <span className="text-sm font-mono font-bold text-teal-300">
+              <Clock className="h-3 sm:h-3.5 w-3 sm:w-3.5 text-teal-400" />
+              <span className="text-xs sm:text-sm font-mono font-bold text-teal-300">
                 {bestDelta !== null ? `${bestDelta.toFixed(2)}s` : '--'}
               </span>
             </div>
@@ -401,7 +377,7 @@ export default function App() {
         </section>
 
         {/* Main Display Stage */}
-        <main id="game-stage" className="flex-grow flex flex-col justify-center items-center py-2 relative">
+        <main id="game-stage" className="flex-grow flex flex-col justify-center items-center py-1 sm:py-2 relative min-h-0">
           <AnimatePresence mode="wait">
             
             {/* IDLE STATE */}
@@ -411,16 +387,16 @@ export default function App() {
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="w-full flex flex-col items-center justify-center text-center space-y-6"
+                className="w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6"
               >
                 <div className="flex flex-col items-center space-y-1">
                   <span className="text-xs font-mono font-bold tracking-widest text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full uppercase">
                     Challenge Target
                   </span>
-                  <div className="relative flex items-center justify-center py-4">
+                  <div className="relative flex items-center justify-center py-2 sm:py-4">
                     {/* Ring glow behind text */}
-                    <div className="absolute w-44 h-44 rounded-full bg-emerald-500/5 blur-xl pointer-events-none" />
-                    <span className="text-7xl font-display font-extrabold tracking-tight text-white select-none">
+                    <div className="absolute w-36 h-36 sm:w-44 sm:h-44 rounded-full bg-emerald-500/5 blur-xl pointer-events-none" />
+                    <span className="text-6xl sm:text-7xl font-display font-extrabold tracking-tight text-white select-none">
                       {targetTime.toFixed(2)}
                       <span className="text-xl text-zinc-500 font-medium ml-1">s</span>
                     </span>
@@ -442,9 +418,9 @@ export default function App() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="w-full flex flex-col items-center justify-center text-center space-y-8"
+                className="w-full flex flex-col items-center justify-center text-center space-y-4 sm:space-y-8"
               >
-                <div className="relative flex items-center justify-center w-48 h-48">
+                <div className="relative flex items-center justify-center w-36 h-36 sm:w-48 sm:h-48">
                   {/* Expanding radar pulse rings */}
                   <div className="absolute w-full h-full rounded-full border border-red-500/20 animate-ping" />
                   <div className="absolute w-3/4 h-3/4 rounded-full border border-red-500/40 animate-pulse pointer-events-none" />
@@ -473,7 +449,7 @@ export default function App() {
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -15 }}
-                className="w-full flex flex-col items-center justify-center space-y-5"
+                className="w-full flex flex-col items-center justify-center space-y-3.5 sm:space-y-5"
               >
                 {/* Result Tier Title */}
                 <div className="text-center space-y-1">
@@ -483,30 +459,30 @@ export default function App() {
                 </div>
 
                 {/* Accuracy Match breakdown */}
-                <div className="grid grid-cols-2 gap-4 w-full max-w-[320px] bg-zinc-900/40 border border-zinc-800/45 rounded-2xl p-4 relative overflow-hidden">
+                <div className="grid grid-cols-2 gap-3 w-full max-w-[290px] sm:max-w-[320px] bg-zinc-900/40 border border-zinc-800/45 rounded-2xl p-3 sm:p-4 relative overflow-hidden">
                   <div className="flex flex-col justify-center border-r border-zinc-800/80 pr-2">
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Target</span>
-                    <span className="text-2xl font-mono font-bold text-zinc-300">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Target</span>
+                    <span className="text-xl sm:text-2xl font-mono font-bold text-zinc-300">
                       {targetTime.toFixed(2)}<span className="text-xs text-zinc-500">s</span>
                     </span>
                   </div>
                   <div className="flex flex-col justify-center pl-2">
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Your Clock</span>
-                    <span className="text-2xl font-mono font-bold text-white">
+                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-wider mb-1">Your Clock</span>
+                    <span className="text-xl sm:text-2xl font-mono font-bold text-white">
                       {elapsedTime.toFixed(3)}<span className="text-xs text-zinc-500">s</span>
                     </span>
                   </div>
                 </div>
 
                 {/* Difference Badge & explanation */}
-                <div className="text-center space-y-2 max-w-[280px]">
+                <div className="text-center space-y-1.5 sm:space-y-2 max-w-[280px]">
                   <div className="inline-flex flex-col items-center">
-                    <span className="text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-1">Accuracy Gap</span>
-                    <span className={`text-4xl font-display font-black tracking-tight ${currentTier.textColorClass}`}>
+                    <span className="text-[9px] sm:text-[10px] font-mono text-zinc-500 uppercase tracking-widest mb-0.5">Accuracy Gap</span>
+                    <span className={`text-3xl sm:text-4xl font-display font-black tracking-tight ${currentTier.textColorClass}`}>
                       {formatDelta(currentDelta)}
                     </span>
                   </div>
-                  <p className="text-xs text-zinc-400 leading-relaxed font-light">
+                  <p className="text-[11px] sm:text-xs text-zinc-400 leading-relaxed font-light px-2">
                     {currentTier.description}
                   </p>
                 </div>
@@ -535,12 +511,12 @@ export default function App() {
         </main>
 
         {/* Massive Thumb Control Area */}
-        <section id="control-zone" className="w-full flex flex-col items-center justify-center py-4 relative">
+        <section id="control-zone" className="w-full flex flex-col items-center justify-center py-2 sm:py-4 relative">
           <div className="relative flex items-center justify-center">
             
             {/* Dynamic decorative visual ring under/around the trigger button */}
             {gameState === 'COUNTING' && (
-              <span className="absolute w-32 h-32 rounded-full border border-red-500/30 animate-ping pointer-events-none" />
+              <span className="absolute w-28 h-28 sm:w-32 sm:h-32 rounded-full border border-red-500/30 animate-ping pointer-events-none" />
             )}
             
             <motion.button
@@ -554,7 +530,7 @@ export default function App() {
               }}
               onTouchStart={startCounting}
               onTouchEnd={() => stopCounting()}
-              className={`w-28 h-28 rounded-full flex flex-col items-center justify-center border-4 outline-none relative select-none touch-none cursor-pointer transition-all ${
+              className={`w-24 h-24 sm:w-28 sm:h-28 rounded-full flex flex-col items-center justify-center border-4 outline-none relative select-none touch-none cursor-pointer transition-all ${
                 gameState === 'IDLE' 
                   ? 'bg-zinc-900 border-zinc-800 hover:border-emerald-500/50 hover:bg-zinc-900/90 shadow-[0_0_20px_rgba(16,185,129,0.05)] text-zinc-300' 
                   : gameState === 'COUNTING'
@@ -566,37 +542,37 @@ export default function App() {
             >
               {gameState === 'IDLE' && (
                 <div className="flex flex-col items-center pointer-events-none">
-                  <span className="text-xs font-mono tracking-widest font-black uppercase text-zinc-400">HOLD</span>
-                  <span className="text-[10px] font-mono tracking-wider text-zinc-600 mt-0.5">TRIGGER</span>
+                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-zinc-400">HOLD</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-zinc-600 mt-0.5">TRIGGER</span>
                 </div>
               )}
               {gameState === 'COUNTING' && (
                 <div className="flex flex-col items-center pointer-events-none">
-                  <span className="text-xs font-mono tracking-widest font-black uppercase animate-pulse text-white">RELEASE</span>
-                  <span className="text-[10px] font-mono tracking-wider text-red-200 mt-0.5">AT TARGET</span>
+                  <span className="text-[11px] sm:text-xs font-mono tracking-widest font-black uppercase text-white">RELEASE</span>
+                  <span className="text-[9px] sm:text-[10px] font-mono tracking-wider text-red-200 mt-0.5">AT TARGET</span>
                 </div>
               )}
               {gameState === 'RESULT' && (
-                <Clock className="h-6 w-6 text-zinc-600" />
+                <Clock className="h-5 w-5 sm:h-6 sm:w-6 text-zinc-600" />
               )}
             </motion.button>
           </div>
           
-          <div className="h-4 mt-2">
+          <div className="h-4 mt-1.5">
             {gameState === 'IDLE' && (
-              <p className="text-[10px] font-mono text-zinc-500 tracking-widest uppercase">READY TO ACQUIRE</p>
+              <p className="text-[9px] sm:text-[10px] font-mono text-zinc-500 tracking-widest uppercase">READY TO ACQUIRE</p>
             )}
             {gameState === 'COUNTING' && (
-              <p className="text-[10px] font-mono text-red-400/80 tracking-widest uppercase animate-pulse">RECORDING ELAPSED TIME</p>
+              <p className="text-[9px] sm:text-[10px] font-mono text-red-400/80 tracking-widest uppercase animate-pulse">RECORDING ELAPSED TIME</p>
             )}
             {gameState === 'RESULT' && (
-              <p className="text-[10px] font-mono text-zinc-500 tracking-widest uppercase">MATCH RESOLVED</p>
+              <p className="text-[9px] sm:text-[10px] font-mono text-zinc-500 tracking-widest uppercase">MATCH RESOLVED</p>
             )}
           </div>
         </section>
 
         {/* Footer sliding actions panel */}
-        <footer id="footer-actions-panel" className="h-[110px] flex items-center justify-center relative">
+        <footer id="footer-actions-panel" className="h-20 sm:h-24 flex items-center justify-center relative">
           <AnimatePresence mode="wait">
             
             {/* IDLE state showing subtle attempt dots to look hyper polished */}
@@ -658,24 +634,15 @@ export default function App() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 30 }}
                 transition={{ type: 'spring', damping: 20, stiffness: 120 }}
-                className="w-full grid grid-cols-2 gap-3"
+                className="w-full flex justify-center"
               >
-                <button
-                  id="share-button"
-                  onClick={sharePerformance}
-                  className="flex items-center justify-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-300 hover:text-white hover:bg-zinc-900/80 active:scale-95 transition-all"
-                >
-                  <Share2 className="h-4 w-4" />
-                  {shareCopied ? 'Copied!' : 'Share Score'}
-                </button>
-
                 <button
                   id="next-round-button"
                   onClick={handleNextRound}
-                  className="flex items-center justify-center gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl px-4 py-3 text-sm font-semibold text-zinc-950 hover:opacity-90 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                  className="w-full max-w-[280px] flex items-center justify-center gap-1.5 sm:gap-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-xl px-4 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold text-zinc-950 hover:opacity-90 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.15)]"
                 >
                   <span>Next Round</span>
-                  <ArrowRight className="h-4 w-4 stroke-[3px]" />
+                  <ArrowRight className="h-3.5 sm:h-4 w-3.5 sm:w-4 stroke-[3px]" />
                 </button>
               </motion.div>
             )}
